@@ -1,6 +1,7 @@
 package io.github.gibatron.bowbattle.mixin;
 
 import io.github.gibatron.bowbattle.BowBattle;
+import java.util.UUID;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -17,13 +18,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import xyz.nucleoid.plasmid.game.manager.GameSpaceManager;
-
-import java.util.UUID;
+import xyz.nucleoid.plasmid.api.game.GameSpaceManager;
+import xyz.nucleoid.stimuli.event.EventResult;
 
 @Mixin(ProjectileEntity.class)
 public abstract class ProjectileEntityMixin extends Entity {
-    @Shadow private UUID ownerUuid;
+
+    @Shadow
+    private UUID ownerUuid;
+
     public ProjectileEntityMixin(EntityType<?> type, World world) {
         super(type, world);
     }
@@ -32,20 +35,37 @@ public abstract class ProjectileEntityMixin extends Entity {
     private void onBlockHit(BlockHitResult blockHitResult, CallbackInfo ci) {
         var world = this.getWorld();
         var gameSpace = GameSpaceManager.get().byWorld(world);
-        if (gameSpace != null && gameSpace.getBehavior().testRule(BowBattle.BOW_GRAPPLES_SOUL_LANTERNS) == ActionResult.SUCCESS) {
-            if (world.getBlockState(blockHitResult.getBlockPos()).getBlock() == Blocks.SOUL_LANTERN) {
+        if (
+            gameSpace != null &&
+            gameSpace
+                .getBehavior()
+                .testRule(BowBattle.BOW_GRAPPLES_SOUL_LANTERNS) ==
+            EventResult.ALLOW
+        ) {
+            if (
+                world.getBlockState(blockHitResult.getBlockPos()).getBlock() ==
+                Blocks.SOUL_LANTERN
+            ) {
                 if (ownerUuid != null && world instanceof ServerWorld) {
                     Entity owner = ((ServerWorld) world).getEntity(ownerUuid);
                     if (owner != null) {
-                        owner.setVelocity(blockHitResult.getPos().subtract(owner.getPos()).normalize().multiply(1));
+                        owner.setVelocity(
+                            blockHitResult
+                                .getPos()
+                                .subtract(owner.getPos())
+                                .normalize()
+                                .multiply(1)
+                        );
                         owner.velocityModified = true;
-                        ((PlayerEntity) owner).addStatusEffect(new StatusEffectInstance(
-                                StatusEffects.LEVITATION,
-                                20,
-                                254,
-                                true,
-                                false
-                        ));
+                        ((PlayerEntity) owner).addStatusEffect(
+                                new StatusEffectInstance(
+                                    StatusEffects.LEVITATION,
+                                    20,
+                                    254,
+                                    true,
+                                    false
+                                )
+                            );
                         remove(RemovalReason.DISCARDED);
                     }
                 }

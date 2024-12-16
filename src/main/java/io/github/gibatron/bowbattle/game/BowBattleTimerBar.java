@@ -1,16 +1,21 @@
 package io.github.gibatron.bowbattle.game;
 
 import net.minecraft.entity.boss.BossBar;
-import xyz.nucleoid.plasmid.game.common.widget.BossBarWidget;
-import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
 import net.minecraft.text.Text;
+import xyz.nucleoid.plasmid.api.game.common.GlobalWidgets;
+import xyz.nucleoid.plasmid.api.game.common.widget.BossBarWidget;
 
 public final class BowBattleTimerBar {
+
     private final BossBarWidget widget;
 
     public BowBattleTimerBar(GlobalWidgets widgets) {
         Text title = Text.literal("Waiting for the game to start...");
-        this.widget = widgets.addBossBar(title, BossBar.Color.GREEN, BossBar.Style.NOTCHED_10);
+        this.widget = widgets.addBossBar(
+            title,
+            BossBar.Color.GREEN,
+            BossBar.Style.NOTCHED_10
+        );
     }
 
     public void update(long ticksUntilEnd, long totalTicksUntilEnd) {

@@ -3,20 +3,20 @@ package io.github.gibatron.bowbattle.game;
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import xyz.nucleoid.plasmid.game.GameSpace;
-import xyz.nucleoid.plasmid.game.player.PlayerSet;
-import net.minecraft.server.network.ServerPlayerEntity;
+import java.util.Set;
 import net.minecraft.network.packet.s2c.play.PositionFlag;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
-
-import java.util.Set;
+import xyz.nucleoid.plasmid.api.game.GameSpace;
+import xyz.nucleoid.plasmid.api.game.player.PlayerSet;
 
 public class BowBattleStageManager {
+
     private long closeTime = -1;
     public long finishTime = -1;
     private long startTime = -1;
@@ -73,7 +73,9 @@ public class BowBattleStageManager {
                     continue;
                 }
 
-                FrozenPlayer state = this.frozen.computeIfAbsent(player, p -> new FrozenPlayer());
+                FrozenPlayer state =
+                    this.frozen.computeIfAbsent(player, p -> new FrozenPlayer()
+                        );
 
                 if (state.lastPos == null) {
                     state.lastPos = player.getPos();
@@ -84,10 +86,20 @@ public class BowBattleStageManager {
                 double destZ = state.lastPos.z;
 
                 // Set X and Y as relative so it will send 0 change when we pass yaw (yaw - yaw = 0) and pitch
-                Set<PositionFlag> flags = ImmutableSet.of(PositionFlag.X_ROT, PositionFlag.Y_ROT);
+                Set<PositionFlag> flags = ImmutableSet.of(
+                    PositionFlag.X_ROT,
+                    PositionFlag.Y_ROT
+                );
 
                 // Teleport without changing the pitch and yaw
-                player.networkHandler.requestTeleport(destX, destY, destZ, player.getYaw(), player.getPitch(), flags);
+                player.networkHandler.requestTeleport(
+                    destX,
+                    destY,
+                    destZ,
+                    player.getYaw(),
+                    player.getPitch()
+                    //flags
+                );
             }
         }
 
@@ -97,16 +109,35 @@ public class BowBattleStageManager {
             PlayerSet players = space.getPlayers();
 
             if (sec > 0) {
-                players.showTitle(Text.literal(Integer.toString(sec)).formatted(Formatting.BOLD), 20);
-                players.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), SoundCategory.PLAYERS, 1.0F, 1.0F);
+                players.showTitle(
+                    Text.literal(Integer.toString(sec)).formatted(
+                        Formatting.BOLD
+                    ),
+                    20
+                );
+                players.playSound(
+                    SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(),
+                    SoundCategory.PLAYERS,
+                    1.0F,
+                    1.0F
+                );
             } else {
-                players.showTitle(Text.literal("Go!").formatted(Formatting.BOLD), 20);
-                players.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), SoundCategory.PLAYERS, 1.0F, 2.0F);
+                players.showTitle(
+                    Text.literal("Go!").formatted(Formatting.BOLD),
+                    20
+                );
+                players.playSound(
+                    SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(),
+                    SoundCategory.PLAYERS,
+                    1.0F,
+                    2.0F
+                );
             }
         }
     }
 
     public static class FrozenPlayer {
+
         public Vec3d lastPos;
     }
 
